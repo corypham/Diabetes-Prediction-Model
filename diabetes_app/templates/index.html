@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diabetes Risk Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Diabetes Risk Prediction</h2>
+        
+        <!-- Result section (initially hidden) -->
+        <div id="result-section" style="display: none;">
+            <div class="result-box">
+                <h3>Prediction Result</h3>
+                <p>Risk Level: <span id="risk-level"></span></p>
+                <p>Probability: <span id="prediction-value"></span>%</p>
+            </div>
+        </div>
+
+        <form id="prediction-form">
+            <div class="form-group">
+              <label>Age:</label>
+              <input type="range" name="age" min="0" max="80" step="1" value="30" oninput="this.nextElementSibling.value = this.value">
+              <output>30</output>
+            </div>
+
+            <div class="form-group">
+                <label>Hypertension:</label>
+                <select name="hypertension">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Heart Disease:</label>
+                <select name="heart_disease">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+              <label>BMI:</label>
+              <input type="range" name="bmi" min="10" max="50" step="0.1" value="25.0" oninput="this.nextElementSibling.value = this.value">
+              <output>25.0</output>
+            </div>
+          
+            <div class="form-group">
+                <label>HbA1c Level:</label>
+                <input type="range" name="hba1c" min="3.5" max="9.0" step="0.1" value="5.5" oninput="this.nextElementSibling.value = this.value">
+                <output>5.5</output>
+            </div>
+            
+            <div class="form-group">
+                <label>Blood Glucose Level:</label>
+                <input type="range" name="blood_glucose" min="70" max="300" step="1" value="100" oninput="this.nextElementSibling.value = this.value">
+                <output>100</output>
+            </div>
+
+            <div class="form-group">
+                <label>Gender:</label>
+                <select name="gender_female">
+                    <option value="0">Male</option>
+                    <option value="1">Female</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Smoking History:</label>
+                <select name="smoking_history">
+                    <option value="0">Never</option>
+                    <option value="1">Current</option>
+                    <option value="2">Former</option>
+                    <option value="3">Ever</option>
+                    <option value="4">Not Current</option>
+                </select>
+            </div>
+
+            <button type="submit">Predict Diabetes Risk</button>
+        </form>
+    </div>
+
+    <script>
+      $(document).ready(function() {
+          $('#prediction-form').on('submit', function(e) {
+              e.preventDefault();
+              
+              // Show loading state
+              const button = $(this).find('button[type="submit"]');
+              button.prop('disabled', true);
+              button.text('Predicting...');
+              
+              $.ajax({
+                  url: '/predict',
+                  type: 'POST',
+                  data: $(this).serialize(),
+                  success: function(response) {
+                      $('#risk-level').text(response.risk_level);
+                      $('#prediction-value').text(response.prediction);
+                      $('#result-section').slideDown();
+                  },
+                  error: function(error) {
+                      console.error('Error:', error);
+                      alert('Error making prediction. Please try again.');
+                  },
+                  complete: function() {
+                      // Reset button state
+                      button.prop('disabled', false);
+                      button.text('Predict Diabetes Risk');
+                  }
+              });
+          });
+  
+          // Update outputs when sliders change
+          $('input[type="range"]').on('input', function() {
+              $(this).next('output').val(this.value);
+          });
+      });
+    </script>
+</body>
+</html>
